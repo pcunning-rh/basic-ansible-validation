@@ -41,3 +41,7 @@
             port:
               targetPort: 80
             alternateBackends: []
+      register: __created_route
+    - name: Provide URL
+      ansible.builtin.debug:
+        msg: "The URL for the application is: https://{{ __created_route.result.spec.host }}/"
