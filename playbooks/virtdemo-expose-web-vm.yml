@@ -1,0 +1,43 @@
+---
+- name: Create service and route for lamp web VM
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Create Service
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: lamp-web-demosvc
+            namespace: linuxvm
+          spec:
+            ports:
+              - protocol: TCP
+                port: 80
+                targetPort: 80
+            selector:
+              vm.kubevirt.io/name: web-prod-01
+    - name: Create Route
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: route.openshift.io/v1
+          kind: Route
+          metadata:
+            name: lamp-web-aap-demo
+            namespace: linuxvm
+          spec:
+            path: /
+            to:
+              name: lamp-web-demosvc
+              weight: 100
+              kind: Service
+            host: ''
+            tls:
+              insecureEdgeTerminationPolicy: Redirect
+              termination: edge
+            port:
+              targetPort: 80
+            alternateBackends: []
