@@ -3,12 +3,15 @@
   hosts: localhost
   gather_facts: false
   tasks:
+    - name: Construct some variables
+      ansible.builtin.set_fact:
+        inventory_hostname: "{{ namespace }}-{{ target_vm }}"
 
     - name: Extract PVC name from hostvars of {{ target_vm }}
       ansible.builtin.set_fact:
         pvc_name: >-
           {{
-            hostvars[namespace ~ '-' ~ vm_name].vmi_volume_status
+            hostvars[inventory_hostname].vmi_volume_status
             | selectattr('persistentVolumeClaimInfo', 'defined')
             | map(attribute='persistentVolumeClaimInfo.claimName')
             | first
@@ -21,7 +24,7 @@
           apiVersion: v1
           kind: PersistentVolumeClaim
           metadata:
-            name: "{{ vm_name }}"
+            name: "{{ pvc_name }}"
             namespace: "{{ vm_namespace }}"
           spec:
             resources:
