@@ -1,0 +1,29 @@
+---
+- name: Expand VM storage
+  hosts: localhost
+  gather_facts: false
+  tasks:
+
+    - name: Extract PVC name from hostvars of {{ target_vm }}
+      ansible.builtin.set_fact:
+        pvc_name: >-
+          {{
+            hostvars[namespace ~ '-' ~ vm_name].vmi_volume_status
+            | selectattr('persistentVolumeClaimInfo', 'defined')
+            | map(attribute='persistentVolumeClaimInfo.claimName')
+            | first
+          }}
+
+    - name: Resize the "{{ target_vm }}" PVC to "{{ new_size }}"
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: "{{ vm_name }}"
+            namespace: "{{ vm_namespace }}"
+          spec:
+            resources:
+              requests:
+                storage: "{{ new_size }}"
