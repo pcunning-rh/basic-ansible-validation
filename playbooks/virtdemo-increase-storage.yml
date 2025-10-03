@@ -5,7 +5,7 @@
   tasks:
     - name: Construct some variables
       ansible.builtin.set_fact:
-        inv_host: "{{ namespace }}-{{ target_vm }}"
+        inv_host: "{{ vm_namespace }}-{{ target_vm }}"
 
     - name: Extract PVC name from hostvars of {{ target_vm }}
       ansible.builtin.set_fact:
