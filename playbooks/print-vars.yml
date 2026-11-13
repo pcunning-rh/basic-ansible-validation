@@ -1,0 +1,12 @@
+---
+- name: Print extra vars
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Show user-supplied vars
+      ansible.builtin.debug:
+        msg: >-
+          {{ vars | dict2items
+             | rejectattr('key', 'match', '^(ansible_|playbook_|inventory_|group_names|groups|hostvars|omit|role_|environment)')
+             | items2dict }}
